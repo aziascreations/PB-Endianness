@@ -1,0 +1,9 @@
+*.obj
+*.lib
+*.log
+*.exe
+*.res
+*.cfg
+Endianness
+Trash1/
+Trash2/

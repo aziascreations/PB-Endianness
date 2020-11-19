@@ -1,0 +1,12 @@
+ASM
+0
+OBJ
+0
+Endianness
+;
+; Library functions (FunctionName, Arg1, Arg2, ...)
+;
+NibbleSwap, Byte (Value.a | Value.b) - Swaps the nibbles of the given Ascii or Byte value.
+Byte
+EndianSwap2, Word (Value.w | Value.u) - Swaps the nibbles of the given Word or Unicode value.
+Word
