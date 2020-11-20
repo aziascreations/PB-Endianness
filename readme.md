@@ -1,6 +1,6 @@
 # PB-Endianness
 
-A x64 user library for PureBasic that allows you to easily flip the endianness of any primitive data types that is available in PB.
+A x64 user library for PureBasic that allows you to easily flip the endianness of any primitive data types that are available in PB.
 
 ## Building
 
