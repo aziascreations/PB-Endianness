@@ -2,6 +2,11 @@
 
 A x64 user library for PureBasic that allows you to easily flip the endianness of any primitive data types that are available in PB.
 
+This project is a "continuation" of my old "*[PB-Utils/Endianness.pbi](/aziascreations/PB-Utils/)*" include.
+
+The speed is pretty much the same when the debugger is disabled (1-2ms per 1M calls).<br>
+And it is around 7x times faster when it is enabled (~45ms vs ~360ms).
+
 ## Building
 
 To build the library and the resident file, you need to follow these steps:
