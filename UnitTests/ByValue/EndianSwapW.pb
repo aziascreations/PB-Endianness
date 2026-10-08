@@ -7,7 +7,7 @@ EnableExplicit
 XIncludeFile "../_UnitTesting.pbi"
 XIncludeFile "../../Includes/Endianness.pbi"
 
-Global Counter.q = 0
+Global Counter.i = 0
 Global Current.w = 0
 Global Result.w = 0
 
@@ -60,5 +60,3 @@ Debug "Done !"
 EndTime = ElapsedMilliseconds()
 OpenConsole()
 PrintN("Took " + Str(EndTime - StartTime) + "ms")
-
-Input()

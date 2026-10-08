@@ -103,5 +103,3 @@ Debug "Done !"
 EndTime = ElapsedMilliseconds()
 OpenConsole()
 PrintN("Took " + Str(EndTime - StartTime) + "ms")
-
-Input()
