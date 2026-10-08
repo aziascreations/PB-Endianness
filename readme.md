@@ -5,11 +5,39 @@ This project is a "continuation" of my old "*[PB-Utils/Endianness.pbi](/aziascre
 
 
 ## Features
-...
+* Endian swap for `.u`, `.w`, `.l`, `.i`, `.q`
+* Nibble swap for `.a`, `.b`
 
 
 ## Usage
-...
+
+
+
+## Example
+
+### By Value
+```purebasic
+XIncludeFile "Endianness.pbi"
+
+Define MyValue.l = $EFBEADDE
+
+MyValue = EndianSwapL($MyValue)
+
+Debug Hex(MyValue, #PB_Long)
+; Prints: DEADBEEF
+```
+
+### By Pointer
+```purebasic
+XIncludeFile "Endianness.pbi"
+
+Define MyValue.l = $EFBEADDE
+
+EndianSwapPtr32(@MyValue)
+
+Debug Hex(MyValue, #PB_Long)
+; Prints: DEADBEEF
+```
 
 
 ## Configuration

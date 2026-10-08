@@ -34,6 +34,13 @@ function Select-Choice([string]$Title, [string[]]$Labels) {
 $Architecture = Select-Choice "Architecture" @("x&86", "x&64", "&arm64")
 $Backend = Select-Choice "Backend" @("&ASM", "&C")
 
+# Sets '#Endianness_UseGccBuiltins' in the include, only used by the C backend.
+$UseGccBuiltins = "False"
+if ($Backend -eq "C") {
+	$UseGccBuiltins = Select-Choice "Use GCC builtins" @("&False", "&True")
+}
+$UseGccBuiltinsValue = @{ "False" = 0; "True" = 1 }[$UseGccBuiltins]
+
 $SelectedCompilers = @($Compilers[$Architecture] | Where-Object { $_.Backends -contains $Backend })
 if ($SelectedCompilers.Count -eq 0) {
 	throw "No compilers configured for $Architecture with the $Backend backend."
@@ -50,12 +57,12 @@ foreach ($Compiler in $SelectedCompilers) {
 		throw "Compiler not found: $CompilerExe"
 	}
 
-	Write-Host "`n=== PureBasic $($Compiler.Name) - $Architecture - $Backend ===" -ForegroundColor Cyan
+	Write-Host "`n=== PureBasic $($Compiler.Name) - $Architecture - $Backend - GCC builtins: $UseGccBuiltins ===" -ForegroundColor Cyan
 
 	foreach ($UnitTest in $UnitTests) {
 		$Exe = Join-Path $BuildDir "$($UnitTest.BaseName).exe"
 		
-		$CompilerOutput = & $CompilerExe $UnitTest.FullName /CONSOLE /EXE $Exe | Out-String
+		$CompilerOutput = & $CompilerExe $UnitTest.FullName /CONSOLE /EXE $Exe /CONSTANT "Endianness_UseGccBuiltins=$UseGccBuiltinsValue" | Out-String
 		if ($LASTEXITCODE -ne 0) {
 			throw "Compilation failed: $($UnitTest.Name) with PureBasic $($Compiler.Name)`n$CompilerOutput"
 		}
