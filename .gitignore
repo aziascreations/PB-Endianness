@@ -1,10 +1,11 @@
-*.obj
-*.lib
-*.log
+# IDEs
+.vs/
+.idea/
+
+# Build Artifacts
 *.exe
-*.res
+*.dll
+
+# Trash
+Trash/
 *.cfg
-Endianness
-Trash1/
-Trash2/
-Tests/

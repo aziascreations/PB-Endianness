@@ -1,80 +1,38 @@
-# PB-Endianness
-
-A x64 user library for PureBasic that allows you to easily flip the endianness of any primitive data types that are available in PB.
+# PureBasic - Endianness Swapper
+An include that allows you to easily and efficiently swap the endianness of your values in PureBasic.
 
 This project is a "continuation" of my old "*[PB-Utils/Endianness.pbi](/aziascreations/PB-Utils/)*" include.
 
-The speed is pretty much the same when the debugger is disabled (1-2ms per 1M calls).<br>
-And it is around 7x times faster when it is enabled (~45ms vs ~360ms).
 
-## Building
+## Features
+...
 
-To build the library and the resident file, you need to follow these steps:
 
-1. Make sure the paths that are in [Build.cmd](Build.cmd) are correct.
-2. Run [Clean.cmd](Clean.cmd) to cleanup the folder.
-3. Run [Build.cmd](Build.cmd) to finally compile everything
+## Usage
+...
 
-## Installing
 
-Once you have compiled the library, or once you have downloaded a release you need to put 2 files in specific locations:
+## Configuration
+...
 
-* `Endianness.res` should go into `{Your-PB-Folder}\Residents`
-* `Endianness` should go into `{Your-PB-Folder}\PureLibraries`
 
-And finally you just have to restart the PureBasic IDE to make sure the compiler is reloaded.
+## Credits
+* djes
+  * Endianness - Original `EndianSwapL(Number.l)` procedure idea 
+  ([Thread](https://www.purebasic.fr/english/viewtopic.php?f=19&t=17427))
 
-## Documentation
 
-**Make sure you declare your variables with the correct data type, otherwise you WILL get invalid results !**
+## Submodules
+Adding submodule:
+```shell
+git submodule add https://github.com/aziascreations/PB-Endianness.git Includes/PB-Endianness
+```
 
-### Library
+Pull latest submodule version:
+```shell
+git submodule update --init --recursive
+```
 
-`NibbleSwap(Value.a | Value.b).a|b`<br>
-&emsp;Returns the number given `ascii` or `byte` value with it's nibbles swapped.
-
-`EndianSwap2(Value.w | Value.u).w|u`<br>
-&emsp;Returns the number given `word` or `unicode` value with it's endianness swapped.
-
-`EndianSwap4(Value.l).l`<br>
-&emsp;Returns the number given `long` value with it's endianness swapped.
-
-`EndianSwap8(Value.i | Value.q).i|q`<br>
-&emsp;Returns the number given `integer` or `quad` value with it's endianness swapped.
-
-### Resident File
-
-`#EndiannessVersionMajor`<br>
-&emsp;Contains the major version number of this library.
-
-`#EndiannessVersionMinor`<br>
-&emsp;Contains the minor version number of this library.
-
-`#EndiannessVersionPatch`<br>
-&emsp;Contains the patch version number of this library.
-
-`#EndiannessVersion$`<br>
-&emsp;Contains the whole version number.
-
-`+EndianSwapW(Number)`<br>
-&emsp;Calls `EndianSwap2(Number)`.
-
-`+EndianSwapU(Number)`<br>
-&emsp;Calls `EndianSwap2(Number)`.
-
-`+EndianSwapL(Number)`<br>
-&emsp;Calls `EndianSwap4(Number)`.
-
-`+EndianSwapI(Number)`<br>
-&emsp;Calls `EndianSwap8(Number)`.
-
-`+EndianSwapQ(Number)`<br>
-&emsp;Calls `EndianSwap8(Number)`.
-
-`+EndianSwap(Number)`<br>
-&emsp;Calls the appropriate `EndianSwapX()` procedure depending on which data type the given value uses.<br>
-&emsp;If the data type is not supported, a `CompilerError` will be raised.
 
 ## License
-
-[Unlicense](LICENSE)
+All the code in this repo is released in the [Public Domain](LICENSE).
