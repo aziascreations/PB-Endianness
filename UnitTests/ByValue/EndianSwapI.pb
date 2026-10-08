@@ -7,16 +7,27 @@
 
 EnableExplicit
 
-XIncludeFile "_UnitTesting.pbi"
-XIncludeFile "../Includes/Endianness.pbi"
+XIncludeFile "../_UnitTesting.pbi"
+XIncludeFile "../../Includes/Endianness.pbi"
 
 Procedure TestEndianSwapI(In.i, Out.i, TestName.s)
 	Protected Tmp.i
 
 	Tmp = EndianSwapI(In)
-	AssertIsTrue(CompareMemory(@Tmp, @Out, SizeOf(Integer)), TestName + " (Single)",
-	             RSet(Bin(In, #PB_Integer), SizeOf(Integer) * 8, "0") + " -> " +
-	             RSet(Bin(Tmp, #PB_Integer), SizeOf(Integer) * 8, "0"))
+	
+	CompilerIf #_NibblePoker_Endianness_IsArch_x86
+	    AssertIsTrue(CompareMemory(@Tmp, @Out, SizeOf(Integer)), TestName + " (Single)",
+	                 RSet(Bin(In, #PB_Long), SizeOf(Integer) * 8, "0") + " -> " +
+	                 RSet(Bin(Tmp, #PB_Long), SizeOf(Integer) * 8, "0"))
+	CompilerElseIf #_NibblePoker_Endianness_IsArch_x64
+	    AssertIsTrue(CompareMemory(@Tmp, @Out, SizeOf(Integer)), TestName + " (Single)",
+	                 RSet(Bin(In, #PB_Quad), SizeOf(Integer) * 8, "0") + " -> " +
+	                 RSet(Bin(Tmp, #PB_Long), SizeOf(Integer) * 8, "0"))
+	CompilerElse
+	    CompilerError "Unsupported CPU Architecture !"
+	CompilerEndIf
+	
+	    
 
 	Tmp = EndianSwapI(Tmp)
 	AssertIsTrue(CompareMemory(@Tmp, @In, SizeOf(Integer)), TestName + " (Full circle)")
@@ -34,7 +45,7 @@ TestEndianSwapI($0000000000000000, $0000000000000000, "All bits at 0")
 Debug ""
 
 Debug "All bits at 1"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($FFFFFFFFFFFFFFFF, $FFFFFFFFFFFFFFFF, "All bits at 1")
 CompilerElse
 	TestEndianSwapI($FFFFFFFF, $FFFFFFFF, "All bits at 1")
@@ -42,7 +53,7 @@ CompilerEndIf
 Debug ""
 
 Debug "Alternating bits (1)"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($AAAAAAAAAAAAAAAA, $AAAAAAAAAAAAAAAA, "Alternating bits (1)")
 CompilerElse
 	TestEndianSwapI($AAAAAAAA, $AAAAAAAA, "Alternating bits (1)")
@@ -50,7 +61,7 @@ CompilerEndIf
 Debug ""
 
 Debug "Alternating bits (2)"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($5555555555555555, $5555555555555555, "Alternating bits (2)")
 CompilerElse
 	TestEndianSwapI($55555555, $55555555, "Alternating bits (2)")
@@ -58,7 +69,7 @@ CompilerEndIf
 Debug ""
 
 Debug "Distinct bytes"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($0123456789ABCDEF, $EFCDAB8967452301, "Distinct bytes")
 CompilerElse
 	TestEndianSwapI($12345678, $78563412, "Distinct bytes")
@@ -66,7 +77,7 @@ CompilerEndIf
 Debug ""
 
 Debug "Lowest byte only"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($00000000000000FF, $FF00000000000000, "Lowest byte only")
 CompilerElse
 	TestEndianSwapI($000000FF, $FF000000, "Lowest byte only")
@@ -74,7 +85,7 @@ CompilerEndIf
 Debug ""
 
 Debug "Highest byte only"
-CompilerIf #PB_Compiler_Processor = #PB_Processor_x64
+CompilerIf SizeOf(Integer) = 8
 	TestEndianSwapI($FF00000000000000, $00000000000000FF, "Highest byte only")
 CompilerElse
 	TestEndianSwapI($FF000000, $000000FF, "Highest byte only")

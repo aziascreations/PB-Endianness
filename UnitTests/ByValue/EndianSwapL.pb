@@ -5,20 +5,20 @@
 
 EnableExplicit
 
-XIncludeFile "_UnitTesting.pbi"
-XIncludeFile "../Includes/Endianness.pbi"
+XIncludeFile "../_UnitTesting.pbi"
+XIncludeFile "../../Includes/Endianness.pbi"
 
-Procedure TestEndianSwapI32(In.l, Out.l, TestName.s)
+Procedure TestEndianSwapL(In.l, Out.l, TestName.s)
 	Protected Tmp.l
 
-	Tmp = EndianSwapI32(In)
+	Tmp = EndianSwapL(In)
 	AssertIsTrue(CompareMemory(@Tmp, @Out, 4), TestName + " (Single)",
 	             RSet(Bin(In, #PB_Long), 32, "0") + " -> " + RSet(Bin(Tmp, #PB_Long), 32, "0"))
 
-	Tmp = EndianSwapI32(Tmp)
+	Tmp = EndianSwapL(Tmp)
 	AssertIsTrue(CompareMemory(@Tmp, @In, 4), TestName + " (Full circle)")
 
-	Tmp = EndianSwapI32(EndianSwapI32(Tmp))
+	Tmp = EndianSwapL(EndianSwapL(Tmp))
 	AssertIsTrue(CompareMemory(@Tmp, @In, 4), TestName + " (Double circle)")
 EndProcedure
 
@@ -27,35 +27,35 @@ Global EndTime
 
 
 Debug "All bits at 0"
-TestEndianSwapI32($00000000, $00000000, "All bits at 0")
+TestEndianSwapL($00000000, $00000000, "All bits at 0")
 Debug ""
 
 Debug "All bits at 1"
-TestEndianSwapI32($FFFFFFFF, $FFFFFFFF, "All bits at 1")
+TestEndianSwapL($FFFFFFFF, $FFFFFFFF, "All bits at 1")
 Debug ""
 
 Debug "Alternating bits (1)"
-TestEndianSwapI32($AAAAAAAA, $AAAAAAAA, "Alternating bits (1)")
+TestEndianSwapL($AAAAAAAA, $AAAAAAAA, "Alternating bits (1)")
 Debug ""
 
 Debug "Alternating bits (2)"
-TestEndianSwapI32($55555555, $55555555, "Alternating bits (2)")
+TestEndianSwapL($55555555, $55555555, "Alternating bits (2)")
 Debug ""
 
 Debug "Four distinct bytes (1)"
-TestEndianSwapI32($12345678, $78563412, "Four distinct bytes (1)")
+TestEndianSwapL($12345678, $78563412, "Four distinct bytes (1)")
 Debug ""
 
 Debug "Four distinct bytes (2)"
-TestEndianSwapI32($F1E2D3C4, $C4D3E2F1, "Four distinct bytes (2)")
+TestEndianSwapL($F1E2D3C4, $C4D3E2F1, "Four distinct bytes (2)")
 Debug ""
 
 Debug "Lowest byte only"
-TestEndianSwapI32($000000FF, $FF000000, "Lowest byte only")
+TestEndianSwapL($000000FF, $FF000000, "Lowest byte only")
 Debug ""
 
 Debug "Highest byte only"
-TestEndianSwapI32($FF000000, $000000FF, "Highest byte only")
+TestEndianSwapL($FF000000, $000000FF, "Highest byte only")
 Debug ""
 
 

@@ -79,8 +79,8 @@ CompilerIf #PB_Compiler_Version >= 600
 	;#_NibblePoker_Endianness_IsArch_Arm32  = Bool(#PB_Compiler_Processor = #PB_Processor_Arm32)
 	#_NibblePoker_Endianness_IsArch_Arm64  = Bool(#PB_Compiler_Processor = #PB_Processor_Arm64)
 CompilerElse
-	#_NibblePoker_Endianness_IsBackend_Asm = #False
-	#_NibblePoker_Endianness_IsBackend_C   = #True
+	#_NibblePoker_Endianness_IsBackend_Asm = #True
+	#_NibblePoker_Endianness_IsBackend_C   = #False
 	#_NibblePoker_Endianness_IsArch_x86    = Bool(#PB_Compiler_Processor = #PB_Processor_x86)
 	#_NibblePoker_Endianness_IsArch_x64    = Bool(#PB_Compiler_Processor = #PB_Processor_x64)
 	;#_NibblePoker_Endianness_IsArch_Arm32  = #False
@@ -522,6 +522,8 @@ Procedure.i EndianSwapI(Number.i)
 				BSWAP rax
 				MOV Number, rax
 			DisableASM
+
+			ProcedureReturn Number
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -627,13 +629,13 @@ EndProcedure
 ;- Aliases
 
 CompilerIf #_NibblePoker_Endianness_IsArch_x86
-	Macro EndianSwapPtr(Pointer) : EndianSwapPtr32 : EndMacro
+	Macro EndianSwapPtr(Pointer) : EndianSwapPtr32(Pointer) : EndMacro
 	
 CompilerElseIf #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
-	Macro EndianSwapPtr(Pointer) : EndianSwapPtr64 : EndMacro
+	Macro EndianSwapPtr(Pointer) : EndianSwapPtr64(Pointer) : EndMacro
 	
 CompilerElse
-	CompilerWarning "Unsupported CPU Architecture in Endianness.pbi for EndianSwapI64(...) !"
+	CompilerWarning "Unsupported CPU Architecture in Endianness.pbi for EndianSwapPtr(...) !"
 	
 CompilerEndIf
 

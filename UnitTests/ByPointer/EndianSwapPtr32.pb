@@ -5,8 +5,8 @@
 
 EnableExplicit
 
-XIncludeFile "_UnitTesting.pbi"
-XIncludeFile "../Includes/Endianness.pbi"
+XIncludeFile "../_UnitTesting.pbi"
+XIncludeFile "../../Includes/Endianness.pbi"
 
 Procedure TestEndianSwapPtr32(In.l, Out.l, TestName.s)
 	Protected Tmp.l
