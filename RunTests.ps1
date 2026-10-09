@@ -6,12 +6,14 @@ $Compilers = [ordered]@{
 	"x86" = @(
 		@{ Name = "5.73"; Path = "C:\Program Files (x86)\PureBasic_573"; Backends = @{ "ASM" = "pbcompiler.exe" } },
 		@{ Name = "6.21"; Path = "C:\Program Files (x86)\PureBasic_621"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
-		@{ Name = "6.40"; Path = "C:\Program Files (x86)\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
+		@{ Name = "6.40"; Path = "C:\Program Files (x86)\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
+		@{ Name = "6.41"; Path = "C:\Program Files (x86)\PureBasic_641"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
 	)
 	"x64" = @(
 		@{ Name = "5.73"; Path = "C:\Program Files\PureBasic_573"; Backends = @{ "ASM" = "pbcompiler.exe" } },
 		@{ Name = "6.21"; Path = "C:\Program Files\PureBasic_621"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
-		@{ Name = "6.40"; Path = "C:\Program Files\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
+		@{ Name = "6.40"; Path = "C:\Program Files\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
+		@{ Name = "6.41"; Path = "C:\Program Files\PureBasic_641"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
 	)
 	"arm64" = @(
 		@{ Name = "6.21"; Path = "C:\Program Files\PureBasic_621_arm64"; Backends = @{ "C" = "pbcompiler.exe" } },

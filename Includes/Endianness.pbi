@@ -1,14 +1,16 @@
 ﻿;{- Code Header
 ; ==- Basic Info -================================
 ;     Name: Endianness.pbi
-;  Version: 2.0.0-indev
-;   Author: Herwin Bozet (NibblePoker)
+;  Version: 2.0.0
+;   Author: Herwin Bozet (NibblePoker) & djes
 ;
 ; ==- Compatibility -=============================
-;  Tested compiler version:
+;  Tested compiler versions:
 ;    * PureBasic 5.73 LTS (x86/x64)
 ;    * PureBasic 6.21 - ASM Backend (x86/x64)
 ;    * PureBasic 6.21 - C Backend (x86/x64/arm64)
+;    * PureBasic 6.40 - ASM Backend (x86/x64)
+;    * PureBasic 6.40 - C Backend (x86/x64)
 ;    * PureBasic 6.41 - ASM Backend (x86/x64)
 ;    * PureBasic 6.41 - C Backend (x86/x64/arm64)
 ; 
@@ -21,15 +23,15 @@
 ; ------------------------------------------------------------------------------
 ;- Remarks
 
-; A second procedure was specially made for and .u (and .a) variables to avoid any potential problem that could happen
-;  if you use "EndianSwapW" when declaring an implicitely typed variable.
-; The compiler might think that you want to use a "Word" and not an "Unsigned Word, aka. Unicode", even if
-;  the value returned be these procedure is exactly the same bit-wise.
-; If your variable is explicitely typed, it shouldn't be a problem, but you should still use the correct one.
-
 ; Each of the procedures in this include uses the RAX register and its parts (EAX, AX, AL, AH).
 ; And in the case of "EndianSwapQ(...)" on x86, the EDX register is used.
 ; Keep this in mind if you call them while using ASM !
+
+; Duplicates exist for the `.a`/`.b` and `.u`/`.w` types to avoid any potential problem that
+;  could result from relying on implicitely typed variable.
+; The compiler might think that you want to use a "Word" and not an "Unsigned Word, aka. Unicode", even if
+;  the value returned be these procedure is exactly the same bit-wise.
+; If your variable is explicitely typed, it shouldn't be a problem, but you should still use the correct one.
 
 ; ROL r8/m8 -> Similar to a shift, but the bits loop
 ; https://www.aldeid.com/wiki/X86-assembly/Instructions/rol
@@ -45,7 +47,7 @@
 ; ------------------------------------------------------------------------------
 ;- Changelog
 
-; * 2.0.0 - ??/??/2026
+; * 2.0.0 - 09/10/2026
 ;   * Revamped include and tests
 ;   * Added support for ARM64
 ;   * Added support for C-Backend
@@ -64,6 +66,15 @@
 
 CompilerIf #PB_Compiler_IsMainFile
 	EnableExplicit
+CompilerEndIf
+
+; Prevents version conflicts.
+CompilerIf Not Defined(Endianness_BypassIncludeCheck, #PB_Constant)
+	CompilerIf Defined(_NibblePoker_Endianness_WasIncluded, #PB_Constant)
+		CompilerError "The `Endianness.pbi` include was already included somewhere else ! (Double import)"
+	CompilerElse
+		#_NibblePoker_Endianness_WasIncluded = #True
+	CompilerEndIf
 CompilerEndIf
 
 
