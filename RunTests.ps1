@@ -1,27 +1,23 @@
 $ErrorActionPreference = "Stop"
 
 
-# PureBasic versions used for unit tests 
+# PureBasic versions used for unit tests, with the compiler executable of each backend.
 $Compilers = [ordered]@{
 	"x86" = @(
-		@{ Name = "5.73"; Path = "C:\Program Files (x86)\PureBasic_573"; Backends = @("ASM") },
-		@{ Name = "6.21"; Path = "C:\Program Files (x86)\PureBasic_621"; Backends = @("ASM", "C") },
-		@{ Name = "6.40"; Path = "C:\Program Files (x86)\PureBasic_640"; Backends = @("ASM", "C") }
+		@{ Name = "5.73"; Path = "C:\Program Files (x86)\PureBasic_573"; Backends = @{ "ASM" = "pbcompiler.exe" } },
+		@{ Name = "6.21"; Path = "C:\Program Files (x86)\PureBasic_621"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
+		@{ Name = "6.40"; Path = "C:\Program Files (x86)\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
 	)
 	"x64" = @(
-		@{ Name = "5.73"; Path = "C:\Program Files\PureBasic_573"; Backends = @("ASM") },
-		@{ Name = "6.21"; Path = "C:\Program Files\PureBasic_621"; Backends = @("ASM", "C") },
-		@{ Name = "6.40"; Path = "C:\Program Files\PureBasic_640"; Backends = @("ASM", "C") }
+		@{ Name = "5.73"; Path = "C:\Program Files\PureBasic_573"; Backends = @{ "ASM" = "pbcompiler.exe" } },
+		@{ Name = "6.21"; Path = "C:\Program Files\PureBasic_621"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } },
+		@{ Name = "6.40"; Path = "C:\Program Files\PureBasic_640"; Backends = @{ "ASM" = "pbcompiler.exe"; "C" = "pbcompilerc.exe" } }
 	)
-	"arm64" = @()
+	"arm64" = @(
+		@{ Name = "6.21"; Path = "C:\Program Files\PureBasic_621_arm64"; Backends = @{ "C" = "pbcompiler.exe" } },
+		@{ Name = "6.41"; Path = "C:\Program Files\PureBasic_641_arm64\PureBasic"; Backends = @{ "C" = "pbcompiler.exe" } }
+	)
 }
-
-# Standard compiler executables.
-$CompilerExecutables = @{
-	"ASM" = "pbcompiler.exe"
-	"C"   = "pbcompilerc.exe"
-}
-
 
 # Prompts for a choice and used `&` for the hotkey.
 function Select-Choice([string]$Title, [string[]]$Labels) {
@@ -41,7 +37,7 @@ if ($Backend -eq "C") {
 }
 $UseGccBuiltinsValue = @{ "False" = 0; "True" = 1 }[$UseGccBuiltins]
 
-$SelectedCompilers = @($Compilers[$Architecture] | Where-Object { $_.Backends -contains $Backend })
+$SelectedCompilers = @($Compilers[$Architecture] | Where-Object { $_.Backends.Contains($Backend) })
 if ($SelectedCompilers.Count -eq 0) {
 	throw "No compilers configured for $Architecture with the $Backend backend."
 }
@@ -52,7 +48,7 @@ $BuildDir = Join-Path ([System.IO.Path]::GetTempPath()) "PB-Endianness"
 New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
 
 foreach ($Compiler in $SelectedCompilers) {
-	$CompilerExe = Join-Path $Compiler.Path "Compilers\$($CompilerExecutables[$Backend])"
+	$CompilerExe = Join-Path $Compiler.Path "Compilers\$($Compiler.Backends[$Backend])"
 	if (-not (Test-Path $CompilerExe)) {
 		throw "Compiler not found: $CompilerExe"
 	}

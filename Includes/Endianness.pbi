@@ -7,10 +7,10 @@
 ; ==- Compatibility -=============================
 ;  Tested compiler version:
 ;    * PureBasic 5.73 LTS (x86/x64)
-;    * //PureBasic 6.21 - ASM Backend (x86/x64)
-;    * //PureBasic 6.21 - C Backend (x86/x64/arm64)
-;    * //PureBasic 6.40 - ASM Backend (x86/x64)
-;    * //PureBasic 6.40 - C Backend (x86/x64/arm64)
+;    * PureBasic 6.21 - ASM Backend (x86/x64)
+;    * PureBasic 6.21 - C Backend (x86/x64/arm64)
+;    * PureBasic 6.41 - ASM Backend (x86/x64)
+;    * PureBasic 6.41 - C Backend (x86/x64/arm64)
 ; 
 ; ==- Links & License -===========================
 ;  License: CC0 1.0 Universal (Public Domain)
@@ -94,7 +94,7 @@ CompilerEndIf
 
 ; Prefer GCC builtins over custom assembly
 CompilerIf Not Defined(Endianness_UseGccBuiltins, #PB_Constant)
-	#Endianness_UseGccBuiltins = #False
+	#Endianness_UseGccBuiltins = #True
 CompilerEndIf
 
 
@@ -115,8 +115,8 @@ Procedure NibbleSwapPtr8(*Address)
 			
 		CompilerElseIf #_NibblePoker_Endianness_IsArch_x64
 			EnableASM
-				MOV rax, *Address   ; rax = the pointer value
-				ROL byte [rax], 4	; rotate the byte AT that address by 4 bits -> swaps its two nibbles
+				MOV rax, *Address
+				ROL byte [rax], 4
 			DisableASM
 			
 		CompilerElse
@@ -126,30 +126,9 @@ Procedure NibbleSwapPtr8(*Address)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
-			!__asm__ volatile (
-			!	"rolb $4, (%0)"
-			!	:
-			!	: "r" (p_address)
-			!	: "memory"
-			!);
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			; Plain C, GCC compiles it to ldrb/ubfiz/ubfx/orr/strb when optimizations are enabled
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
+			; Plain C, GCC will optimize it when optimizations are enabled
 			!*(unsigned char*)p_address = (*(unsigned char*)p_address << 4) | (*(unsigned char*)p_address >> 4);
-
-			; Should roughly compile to:
-			;!__asm__ volatile (
-			;!	"ldrb  %w0, [%3];"
-			;!	"ubfiz %w1, %w0, #4, #4;"
-			;!	"ubfx  %w2, %w0, #4, #4;"
-			;!	"orr   %w0, %w1, %w2;"
-			;!	"strb  %w0, [%3]"
-			;!	: "=&r"(v_value), "=&r"(v_temp1), "=&r"(v_temp2)
-			;!	: "r"(v_address)
-			;!	: "memory"
-			;!);
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -175,10 +154,10 @@ Procedure EndianSwapPtr16(*Address)
 			
 		CompilerElseIf #_NibblePoker_Endianness_IsArch_x64
 			EnableASM
-				MOV rax, *Address   ; rax = the pointer value
-				MOV cx, [rax]		; cx  = the word AT that address
-				XCHG cl, ch			; swap its two bytes
-				MOV [rax], cx		; write the swapped word back
+				MOV rax, *Address
+				MOV cx, [rax]
+				XCHG cl, ch
+				MOV [rax], cx
 			DisableASM
 			
 		CompilerElse
@@ -188,19 +167,13 @@ Procedure EndianSwapPtr16(*Address)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!*(unsigned short*)p_address = __builtin_bswap16(*(unsigned short*)p_address);
 			CompilerElse
-				!__asm__ volatile (
-				!	"rolw $8, %0"
-				!	: "+m" (*(unsigned short*)p_address)
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!*(unsigned short*)p_address = (*(unsigned short*)p_address << 8) | (*(unsigned short*)p_address >> 8);
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -239,19 +212,20 @@ Procedure EndianSwapPtr32(*Address)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!*(unsigned int*)p_address = __builtin_bswap32(*(unsigned int*)p_address);
 			CompilerElse
-				!__asm__ volatile (
-				!	"bswapl %0"
-				!	: "+r" (*(unsigned int*)p_address)
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned int v = *(unsigned int*)p_address;
+				!	*(unsigned int*)p_address =
+				!		 ((v << 24)               ) |
+				!		 ((v <<  8) & 0x00FF0000u) |
+				!		 ((v >>  8) & 0x0000FF00u) |
+				!		 ((v >> 24)               );
+				!}
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -295,31 +269,24 @@ Procedure EndianSwapPtr64(*Address)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!*(unsigned long long*)p_address = __builtin_bswap64(*(unsigned long long*)p_address);
 			CompilerElse
-				!__asm__ volatile (
-				!	"bswapl %0;"
-				!	"bswapl %1;"
-				!	"xchgl  %0, %1"
-				!	: "+r" (((unsigned int*)p_address)[0]), "+r" (((unsigned int*)p_address)[1])
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned long long v = *(unsigned long long*)p_address;
+				!	*(unsigned long long*)p_address =
+				!		 ((v << 56)                          ) |
+				!		 ((v << 40) & 0x00FF000000000000ull) |
+				!		 ((v << 24) & 0x0000FF0000000000ull) |
+				!		 ((v <<  8) & 0x000000FF00000000ull) |
+				!		 ((v >>  8) & 0x00000000FF000000ull) |
+				!		 ((v >> 24) & 0x0000000000FF0000ull) |
+				!		 ((v >> 40) & 0x000000000000FF00ull) |
+				!		 ((v >> 56)                          );
+				!}
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_x64
-			CompilerIf #Endianness_UseGccBuiltins
-				!*(unsigned long long*)p_address = __builtin_bswap64(*(unsigned long long*)p_address);
-			CompilerElse
-				!__asm__ volatile (
-				!	"bswapq %0"
-				!	: "+r" (*(unsigned long long*)p_address)
-				!);
-			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -350,26 +317,9 @@ Procedure.b NibbleSwapB(Number.b)
 		CompilerEndIf
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
-			!__asm__ volatile (
-			!	"rolb $4, %0"
-			!	: "+q" (v_number)
-			!);
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			; Plain C, GCC compiles it to ubfiz/ubfx/orr when optimizations are enabled
-			; The casts avoid the arithmetic right shift and left-shifting a negative value
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
+			; Plain C, GCC will optimize it when optimizations are enabled
 			!v_number = ((unsigned char)v_number << 4) | ((unsigned char)v_number >> 4);
-
-			; Should roughly compile to:
-			;!__asm__ volatile (
-			;!	"ubfiz %w1, %w0, #4, #4;"
-			;!	"ubfx  %w2, %w0, #4, #4;"
-			;!	"orr   %w0, %w1, %w2"
-			;!	: "+r"(v_number), "=&r"(v_temp1), "=&r"(v_temp2)
-			;!);
-			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
 			
@@ -396,25 +346,9 @@ Procedure.a NibbleSwapA(Number.a)
 		CompilerEndIf
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
-			!__asm__ volatile (
-			!	"rolb $4, %0"
-			!	: "+q" (v_number)
-			!);
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			; Plain C, GCC compiles it to ubfiz/ubfx/orr when optimizations are enabled
-			!v_number = (v_number << 4) | (v_number >> 4);
-			
-			; Should roughly compile to:
-			;!__asm__ volatile (
-			;!	"ubfiz %w1, %w0, #4, #4;"
-			;!	"ubfx  %w2, %w0, #4, #4;"
-			;!	"orr   %w0, %w1, %w2"
-			;!	: "+r"(v_number), "=&r"(v_temp1), "=&r"(v_temp2)
-			;!);
-			
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
+			; Plain C, GCC will optimize it when optimizations are enabled
+			!v_number = ((unsigned char)v_number << 4) | ((unsigned char)v_number >> 4);
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
 			
@@ -448,19 +382,16 @@ Procedure.w EndianSwapW(Number.w)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap16(v_number);
 			CompilerElse
-				!__asm__ volatile (
-				!	"rolw $8, %0"
-				!	: "+r" (v_number)
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned short v = v_number;
+				!	v_number = (v << 8) | (v >> 8);
+				!}
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -492,19 +423,16 @@ Procedure.u EndianSwapU(Number.u)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap16(v_number);
 			CompilerElse
-				!__asm__ volatile (
-				!	"rolw $8, %0"
-				!	: "+r" (v_number)
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned short v = v_number;
+				!	v_number = (v << 8) | (v >> 8);
+				!}
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -546,19 +474,20 @@ Procedure.l EndianSwapL(Number.l)
 		
 	CompilerElseIf #_NibblePoker_Endianness_IsBackend_C
 		
-		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64
+		CompilerIf #_NibblePoker_Endianness_IsArch_x86 Or #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap32(v_number);
 			CompilerElse
-				!__asm__ volatile (
-				!	"bswapl %0"
-				!	: "+r" (v_number)
-				!);
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned int v = v_number;
+				!	v_number =
+				!		((v << 24)              ) |
+				!		((v <<  8) & 0x00FF0000u) |
+				!		((v >>  8) & 0x0000FF00u) |
+				!		((v >> 24)              );
+				!}
 			CompilerEndIf
-			
-		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -597,7 +526,7 @@ Procedure.i EndianSwapI(Number.i)
 				BSWAP rax
 				MOV Number, rax
 			DisableASM
-
+			
 			ProcedureReturn Number
 			
 		CompilerElse
@@ -611,6 +540,7 @@ Procedure.i EndianSwapI(Number.i)
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap32(v_number);
 			CompilerElse
+				; Using the pre-optimized ASM since it works well enough to not warrant me breaking it.
 				!__asm__ volatile (
 				!	"bswapl %0"
 				!	: "+r" (v_number)
@@ -621,6 +551,7 @@ Procedure.i EndianSwapI(Number.i)
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap64(v_number);
 			CompilerElse
+				; Using the pre-optimized ASM since it works well enough to not warrant me breaking it.
 				!__asm__ volatile (
 				!	"bswapq %0"
 				!	: "+r" (v_number)
@@ -628,8 +559,23 @@ Procedure.i EndianSwapI(Number.i)
 			CompilerEndIf
 			
 		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
+			CompilerIf #Endianness_UseGccBuiltins
+				!v_number = __builtin_bswap64(v_number);
+			CompilerElse
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned long long v = v_number;
+				!	v_number =
+				!		((v << 56)                        ) |
+				!		((v << 40) & 0x00FF000000000000ull) |
+				!		((v << 24) & 0x0000FF0000000000ull) |
+				!		((v <<  8) & 0x000000FF00000000ull) |
+				!		((v >>  8) & 0x00000000FF000000ull) |
+				!		((v >> 24) & 0x0000000000FF0000ull) |
+				!		((v >> 40) & 0x000000000000FF00ull) |
+				!		((v >> 56)                        );
+				!}
+			CompilerEndIf
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -649,6 +595,7 @@ EndProcedure
 
 ; MOVBE could have been used, but the compiler kept giving a syntax error for some reason :/
 ; See: https://www.felixcloutier.com/x86/movbe
+
 ; TODO: Check again since using "!" can fix this issue.
 ; Same thing with MOVSS and other SSE2 MOV ops with xmm regs.
 
@@ -693,7 +640,7 @@ Procedure.q EndianSwapQ(Number.q)
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap64(v_number);
 			CompilerElse
-				; "A" = the edx:eax register pair holding the 64-bit value
+				; Using the pre-optimized ASM since it works well enough to not warrant me breaking it.
 				!__asm__ volatile (
 				!	"bswapl %%eax;"
 				!	"bswapl %%edx;"
@@ -706,6 +653,7 @@ Procedure.q EndianSwapQ(Number.q)
 			CompilerIf #Endianness_UseGccBuiltins
 				!v_number = __builtin_bswap64(v_number);
 			CompilerElse
+				; Using the pre-optimized ASM since it works well enough to not warrant me breaking it.
 				!__asm__ volatile (
 				!	"bswapq %0"
 				!	: "+r" (v_number)
@@ -713,8 +661,23 @@ Procedure.q EndianSwapQ(Number.q)
 			CompilerEndIf
 			
 		CompilerElseIf #_NibblePoker_Endianness_IsArch_Arm64
-			CompilerWarning "Untested !"
-			CompilerWarning "Not implemented !"
+			CompilerIf #Endianness_UseGccBuiltins
+				!v_number = __builtin_bswap64(v_number);
+			CompilerElse
+				; Plain C, GCC will optimize it when optimizations are enabled
+				!{
+				!	unsigned long long v = v_number;
+				!	v_number =
+				!		((v << 56)                        ) |
+				!		((v << 40) & 0x00FF000000000000ull) |
+				!		((v << 24) & 0x0000FF0000000000ull) |
+				!		((v <<  8) & 0x000000FF00000000ull) |
+				!		((v >>  8) & 0x00000000FF000000ull) |
+				!		((v >> 24) & 0x0000000000FF0000ull) |
+				!		((v >> 40) & 0x000000000000FF00ull) |
+				!		((v >> 56)                        );
+				!}
+			CompilerEndIf
 			
 		CompilerElse
 			CompilerError "Unsupported CPU Architecture !"
@@ -760,45 +723,3 @@ Macro EndianSwapI32(Number) : EndianSwapL(Number) : EndMacro
 
 
 Macro EndianSwapI64(Number) : EndianSwapQ(Number) : EndMacro
-
-
-
-; ------------------------------------------------------------------------------
-;- Macros
-
-; Macro NibbleSwap(Number)
-; 	CompilerSelect TypeOf(Number)
-; 		CompilerCase #PB_Ascii
-; 			NibbleSwapA(Number)
-; 			
-; 		CompilerCase #PB_Byte
-; 			NibbleSwapB(Number)
-; 			
-; 		CompilerDefault
-; 			CompilerError "Unsupported value type given in '+NibbleSwap(Number)' !"
-; 			
-; 	CompilerEndSelect
-; EndMacro
-
-; Macro EndianSwap(Number)
-; 	CompilerSelect TypeOf(Number)
-; 		CompilerCase #PB_Word
-; 			EndianSwapW(Number)
-; 			
-; 		CompilerCase #PB_Unicode
-; 			EndianSwapU(Number)
-; 			
-; 		CompilerCase #PB_Long
-; 			EndianSwapL(Number)
-; 			
-; 		CompilerCase #PB_Integer
-; 			EndianSwapI(Number)
-; 			
-; 		CompilerCase #PB_Quad
-; 			EndianSwapQ(Number)
-; 			
-; 		CompilerDefault
-; 			CompilerError "Unsupported value type given in '+EndianSwap(Number)' !"
-; 			
-; 	CompilerEndSelect
-; EndMacro

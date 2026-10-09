@@ -19,7 +19,7 @@ Procedure TestEndianSwapI(In.i, Out.i, TestName.s)
 	    AssertIsTrue(CompareMemory(@Tmp, @Out, SizeOf(Integer)), TestName + " (Single)",
 	                 RSet(Bin(In, #PB_Long), SizeOf(Integer) * 8, "0") + " -> " +
 	                 RSet(Bin(Tmp, #PB_Long), SizeOf(Integer) * 8, "0"))
-	CompilerElseIf #_NibblePoker_Endianness_IsArch_x64
+	CompilerElseIf #_NibblePoker_Endianness_IsArch_x64 Or #_NibblePoker_Endianness_IsArch_Arm64
 	    AssertIsTrue(CompareMemory(@Tmp, @Out, SizeOf(Integer)), TestName + " (Single)",
 	                 RSet(Bin(In, #PB_Quad), SizeOf(Integer) * 8, "0") + " -> " +
 	                 RSet(Bin(Tmp, #PB_Long), SizeOf(Integer) * 8, "0"))
