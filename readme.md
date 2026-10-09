@@ -32,7 +32,7 @@ XIncludeFile "Endianness.pbi"
 
 Define MyValue.l = $EFBEADDE
 
-MyValue = EndianSwapL($MyValue)
+MyValue = EndianSwapL(MyValue)
 
 Debug Hex(MyValue, #PB_Long)
 ; Prints: DEADBEEF
